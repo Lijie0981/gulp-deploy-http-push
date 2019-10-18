@@ -5,6 +5,7 @@
  * @Last Modified time: 2019-05-09 19:13:40
  */
 
+import {sync} from 'glob';
 import { File } from 'gulp-util';
 import stream = require('readable-stream');
 import { include } from './filter';
@@ -13,30 +14,32 @@ const Transform = stream.Transform;
 
 export function httpPush(options: IDeployOption[]) {
   const restrictor = new Restrictor();
+  const fileOptions: fileOption = {};
+  options.forEach((item) => {
+    if (item.match) {
+      sync(item.match, {realpath: true}).forEach((file) => {
+        fileOptions[file] = {
+          host: item.host,
+          to: item.to};
+      });
+    }
+  });
   return new Transform({
     objectMode: true,
     transform: (file: File, enc, callback) => {
       if (!file.isDirectory()) {
-        options.forEach((option) => {
-          if (!option.match || (option.match && include(file.path, option.match, {
-            root: file.base,
-          }))) {
-            restrictor.add({
-              host: option.host,
-              retry: 2,
-              to: option.to,
+        const option = fileOptions[file.path];
+        restrictor.add({
+          host: option.host,
+          retry: 2,
+          to: option.to,
 
-            }, {
-              contents: file.contents,
-              relative: '/' + file.relative,
-            });
-            // 在match名单中
-            // console.log(option.to, file.path);
-          }
+        }, {
+          contents: file.contents,
+          relative: '/' + file.relative,
         });
       }
       callback();
-
     },
   });
 }
@@ -48,4 +51,7 @@ interface IDeployOption {
   match?: string;
   /** 要部署的basePath */
   to: string;
+}
+interface fileOption {
+  [propName: string]: IDeployOption
 }
