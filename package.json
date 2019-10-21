@@ -1,5 +1,5 @@
 {
-  "name": "gulp-deploy-http-push",
+  "name": "@baidu/gulp-deploy-http-push",
   "version": "0.0.2",
   "discription": "gulp-deploy-http-push",
   "scripts": {

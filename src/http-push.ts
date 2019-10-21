@@ -7,10 +7,9 @@
 
 import {sync} from 'glob';
 import { File } from 'gulp-util';
-import stream = require('readable-stream');
+import {Transform} from './cacheTransform';
 import { include } from './filter';
 import { Restrictor } from './restrictor';
-const Transform = stream.Transform;
 
 export function httpPush(options: IDeployOption[]) {
   const restrictor = new Restrictor();
