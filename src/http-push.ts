@@ -17,6 +17,7 @@ export function httpPush(options: IDeployOption[]) {
   const restrictor = new Restrictor();
   const fileOptions: FileOption = {};
   const cachePath = resolve(process.cwd(), options[0].cachePath ? options[0].cachePath : '.http-push-cache/');
+  mkdirsSync(cachePath);
   // removeCache(cachePath);
   options.forEach((item) => {
     if (item.match) {
@@ -40,7 +41,7 @@ export function httpPush(options: IDeployOption[]) {
               contents: file.contents,
               relative: '/' + file.relative,
             });
-            fs.writeFileSync(cachePath + getMd5(file.path + file.stat.mtimeMs), 'info');
+            fs.writeFileSync(resolve(cachePath + '/' + getMd5(file.path + file.stat.mtimeMs)), 'info');
           }
         }
       callback();
@@ -52,6 +53,18 @@ function getMd5(str: string) {
     md5sum.update(str, 'utf8');
     return md5sum.digest('hex').substring(0, 32);
 }
+
+function mkdirsSync(dir: string) {
+  if (fs.existsSync(dir)) {
+    return true;
+  } else {
+    if (mkdirsSync(dirname(dir))) {
+      fs.mkdirSync(dir);
+      return true;
+    }
+  }
+}
+
 // function removeCache(cachePath) {
 //   const toDay = +new Date();
 //   sync(cachePath + '*').forEach((item) => {
